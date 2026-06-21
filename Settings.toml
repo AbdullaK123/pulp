@@ -1,0 +1,10 @@
+[rate_limiter]
+reddis_addr="redis:6379"
+ip_whitelist = ["127.0.0.1"]
+
+[[rate_limiter.limiter]]
+strategy = "header"
+global_bucket = { tokens_count = 3, add_tokens_every = 120 }
+buckets_per_value = [
+    { value = "X-Telegram-User-Token", tokens_count = 1, add_tokens_every = 100 },
+]

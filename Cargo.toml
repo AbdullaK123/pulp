@@ -1,0 +1,38 @@
+[package]
+name = "pulp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.102"
+axum = { version = "0.8.9", features = [] }
+serde = { version = "1.0.228", features = ["derive"]}
+serde_json = "1.0.150"
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "postgres", "uuid", "chrono"] }
+tokio = { version = "1.52.3", features = ["full"] }
+validator = {version = "0.16", features = ["derive"]}
+axum_rate_limiter = "0.1.0"
+tracing-subscriber = { version = "0.3.23", features = ["fmt", "env-filter"] }
+tower-sessions = { version = "0.14.0", features = ["signed"] }
+tower-sessions-sqlx-store-chrono = { version = "0.14.2", features = ["postgres"] }
+serde_yaml_bw = "2.5.6"
+bb8 = "0.9.1"
+bb8-redis = "0.26.0"
+thiserror = "2.0.18"
+argon2 = "0.5.3"
+chrono = { version = "0.4.45", features = ["serde", "alloc"] }
+uuid = { version = "1.23.3", features = ["v4", "serde"] }
+async-trait = "0.1.89"
+rand = "0.8.6"
+sha2 = "0.10.9"
+tower-http = { version = "0.7.0", features = ["trace"] }
+log = "0.4.32"
+tracing = "0.1.44"
+
+[dev-dependencies]
+axum-test = "20.1.0"
+testcontainers = "0.16"
+serde_json = "1.0.150"
+[[bin]]
+name = "pulp"
+path = "src/main.rs"
