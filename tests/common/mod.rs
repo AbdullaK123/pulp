@@ -72,7 +72,7 @@ pub fn unique_email() -> String {
 
 pub async fn register_user(server: &TestServer, email: &str, password: &str) -> axum_test::TestResponse {
     server
-        .post("/api/auth/register")
+        .post("/api/v1/auth/register")
         .json(&serde_json::json!({
             "email": email,
             "password": password
@@ -82,7 +82,7 @@ pub async fn register_user(server: &TestServer, email: &str, password: &str) -> 
 
 pub async fn login_user(server: &TestServer, email: &str, password: &str) -> axum_test::TestResponse {
     server
-        .post("/api/auth/login")
+        .post("/api/v1/auth/login")
         .json(&serde_json::json!({
             "email": email,
             "password": password
@@ -91,5 +91,5 @@ pub async fn login_user(server: &TestServer, email: &str, password: &str) -> axu
 }
 
 pub async fn logout_user(server: &TestServer) -> axum_test::TestResponse {
-    server.post("/api/auth/logout").await
+    server.post("/api/v1/auth/logout").await
 }

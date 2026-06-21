@@ -39,7 +39,7 @@ async fn login_sets_session_and_allows_authenticated_action() {
 
     // Now an authenticated endpoint should work: create API key
     let create = server
-        .post("/api/auth/api-keys/create")
+        .post("/api/v1/auth/keys/create")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     create.assert_status_ok();
@@ -68,14 +68,14 @@ async fn logout_clears_session() {
 
     // Logout
     let logout = server
-        .post("/api/auth/logout")
+        .post("/api/v1/auth/logout")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     logout.assert_status_ok();
 
     // Authenticated call should now fail with 401
     let create = server
-        .post("/api/auth/api-keys/create")
+        .post("/api/v1/auth/keys/create")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     create.assert_status_unauthorized();

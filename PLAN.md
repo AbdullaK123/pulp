@@ -20,9 +20,9 @@ Get the Rust project compiling, the database running, and a health check endpoin
     - [X] `usage_events` table (id, user_id, api_key_id, operation, file_size_bytes, processing_ms, status, created_at)
     - [X] `subscriptions` table (id, user_id, stripe_customer_id, stripe_subscription_id, status, current_period_start, current_period_end, created_at, updated_at)
 - [X] Environment config with `dotenvy` + a typed config struct
-- [ ] Error handling scaffold — unified API error type with proper HTTP status codes
+- [X] Error handling scaffold — unified API error type with proper HTTP status codes
 - [X] Set up `tracing` + `tracing-subscriber` for structured logging
-- [ ] Verify everything compiles, health endpoint responds, DB connects
+- [X] Verify everything compiles, health endpoint responds, DB connects
 
 **Milestone: Axum server running, Postgres connected, clean project structure.**
 
@@ -33,11 +33,11 @@ Get the Rust project compiling, the database running, and a health check endpoin
 Users need to exist before they can do anything.
 
 - [X] Password hashing with `argon2`
-- [ ] `POST /api/v1/auth/register` — email + password, returns user + session
-- [ ] `POST /api/v1/auth/login` — email + password, returns session
-- [ ] `POST /api/v1/auth/logout` — invalidate session
-- [ ] Session management (JWT or server-side sessions in Redis — pick one)
-- [ ] Auth middleware — extract user from session, attach to request context
+- [X] `POST /api/v1/auth/register` — email + password, returns user + session
+- [X] `POST /api/v1/auth/login` — email + password, returns session
+- [X] `POST /api/v1/auth/logout` — invalidate session
+- [X] Session management (JWT or server-side sessions in Redis — pick one)
+- [X] Auth middleware — extract user from session, attach to request context
 - [ ] OAuth 2.0 flow for Google
 - [ ] OAuth 2.0 flow for GitHub
 - [ ] `GET /api/v1/auth/me` — return current user profile

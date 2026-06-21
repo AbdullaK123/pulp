@@ -7,7 +7,7 @@ async fn create_api_key_requires_auth_401() {
     let harness = common::TestHarness::spawn().await.expect("spawn harness");
     let server = harness.server;
 
-    let resp = server.post("/api/auth/api-keys/create").await;
+    let resp = server.post("/api/v1/auth/keys/create").await;
     resp.assert_status_unauthorized();
 }
 
@@ -29,7 +29,7 @@ async fn create_api_key_ok_with_and_without_name() {
 
     // Without name
     let create1 = server
-        .post("/api/auth/api-keys/create")
+        .post("/api/v1/auth/keys/create")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     create1.assert_status_ok();
@@ -40,7 +40,7 @@ async fn create_api_key_ok_with_and_without_name() {
 
     // With name
     let create2 = server
-        .post("/api/auth/api-keys/create?name=my-test-key")
+        .post("/api/v1/auth/keys/create?name=my-test-key")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     create2.assert_status_ok();
@@ -66,7 +66,7 @@ async fn revoke_api_key_ok_then_not_found() {
 
     // Create a key
     let create = server
-        .post("/api/auth/api-keys/create?name=to-revoke")
+        .post("/api/v1/auth/keys/create?name=to-revoke")
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     create.assert_status_ok();
@@ -75,14 +75,14 @@ async fn revoke_api_key_ok_then_not_found() {
 
     // Revoke it
     let revoke = server
-        .post(&format!("/api/auth/api-keys/revoke?key_id={}", key_id))
+        .post(&format!("/api/v1/auth/keys/revoke?key_id={}", key_id))
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     revoke.assert_status_ok();
 
     // Revoke again: current implementation updates the row again, so 200 is fine
     let revoke2 = server
-        .post(&format!("/api/auth/api-keys/revoke?key_id={}", key_id))
+        .post(&format!("/api/v1/auth/keys/revoke?key_id={}", key_id))
         .add_header("Cookie", format!("session_id={}", session_cookie))
         .await;
     revoke2.assert_status_ok();

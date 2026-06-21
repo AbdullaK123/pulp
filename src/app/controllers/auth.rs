@@ -116,8 +116,8 @@ pub fn create_auth_controller() -> Router<AppState> {
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/logout", post(logout))
-        .route("/api-keys/create", post(create_api_key))
-        .route("/api-keys/revoke", post(revoke_api_key));
+        .route("/keys/create", post(create_api_key))
+        .route("/keys/revoke", post(revoke_api_key));
 
     Router::new().nest("/auth", base_routes)
 }

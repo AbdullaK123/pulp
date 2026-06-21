@@ -47,7 +47,7 @@ pub async fn create_app() -> Router {
     let app =
         Router::new()
             .route("/health", get(health))
-            .nest("/api", all_controllers.with_state(app_state))
+            .nest("/api/v1/", all_controllers.with_state(app_state))
             .layer(TraceLayer::new_for_http());
     app
 }
