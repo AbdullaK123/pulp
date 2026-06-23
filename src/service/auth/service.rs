@@ -1,6 +1,4 @@
-use axum::http::StatusCode;
 use axum::Json;
-use axum::response::IntoResponse;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use serde_json::{json, Value};
@@ -11,10 +9,8 @@ use crate::data::repositories::user::UserRepository;
 use crate::service::errors::ServiceError;
 use crate::shared::password::verify_password;
 use sha2::{Digest, Sha256};
-use sha2::digest::Update;
 use uuid::Uuid;
-use crate::data::models::api_key::{ApiKey, ApiKeyResponse};
-use crate::shared::errors::SharedError;
+use crate::data::models::api_key::{ApiKey, ApiKeyResponse, ApiKeyHintListResponse};
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -50,6 +46,20 @@ impl AuthService {
         }
         let created_user = self.user_repo.register(payload).await?;
         Ok(created_user.into())
+    }
+    
+    pub async fn get_profile(&self, user_id: Uuid) -> Result<UserResponse, ServiceError> {
+        let user = self.user_repo.fetch_user_by_id(user_id).await?;
+        if user.is_none() {
+            return Err(ServiceError::NotFoundError)
+        }
+        Ok(user.unwrap().into())
+    }
+    
+    pub async fn get_keys(&self, user_id: Uuid) -> Result<ApiKeyHintListResponse, ServiceError> {
+        let keys = self.api_key_repo.get_keys(user_id).await?;
+        let response: ApiKeyHintListResponse = keys.into();
+        Ok(response)
     }
 
     pub async fn login(&self, session: Session,  payload: LoginRequest) -> Result<UserResponse, ServiceError> {
@@ -88,8 +98,9 @@ impl AuthService {
 
     pub async fn create_api_key(&self, user_id: Uuid, name: Option<String>) -> Result<ApiKeyResponse, ServiceError> {
         let key = Self::generate_api_key();
+        let key_hint: String = key.chars().take(8).collect();
         let key_hash = Self::hash_api_key(key.clone());
-        let result = self.api_key_repo.create(user_id, key_hash, name).await?;
+        let result = self.api_key_repo.create(user_id, key_hash, key_hint, name).await?;
         Ok(ApiKeyResponse {
             id: result.id,
             name: result.name.unwrap(),

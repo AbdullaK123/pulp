@@ -1,6 +1,6 @@
 use axum::extract::{Query, State};
 use axum::{Json, Router};
-use axum::routing::post;
+use axum::routing::{get, post};
 use serde_json::Value;
 use tower_sessions::Session;
 use uuid::Uuid;
@@ -8,10 +8,18 @@ use crate::app::app::AppState;
 use crate::app::errors::AppError;
 use crate::app::extractors::user_id::UserId;
 use crate::data::models::api_key::ApiKeyResponse;
-use crate::data::models::user::{LoginRequest, LogoutResponse, RegistrationRequest, User, UserResponse};
-use tracing::{info, warn, error, debug};
+use crate::data::models::user::{LoginRequest, LogoutResponse, RegistrationRequest, UserResponse};
+use tracing::{info, warn, debug};
 use serde::Deserialize;
+use crate::data::models::api_key::ApiKeyHintListResponse;
 
+#[derive(Deserialize)]
+pub struct RevokeParams { key_id: Uuid }
+
+#[derive(Deserialize)]
+pub struct CreateApiKeyParams {
+    name: Option<String>,
+}
 
 pub async fn register(
     State(app_state): State<AppState>,
@@ -65,11 +73,6 @@ pub async fn logout(
     }
 }
 
-#[derive(Deserialize)]
-struct CreateApiKeyParams {
-    name: Option<String>,
-}
-
 pub async fn create_api_key(
     State(app_state): State<AppState>,
     UserId(current_user_id): UserId,
@@ -107,8 +110,41 @@ pub async fn revoke_api_key(
     }
 }
 
-#[derive(Deserialize)]
-struct RevokeParams { key_id: Uuid }
+
+
+pub async fn get_profile(
+    State(app_state): State<AppState>,
+    UserId(current_user_id): UserId
+) -> Result<Json<UserResponse>, AppError> {
+    info!(%current_user_id, "Fetching user profile attempt");
+    match app_state.auth_service.get_profile(current_user_id).await {
+        Ok(resp) => {
+            info!(%current_user_id, "Profile fetch success!");
+            Ok(Json(resp))
+        },
+        Err(e) => {
+            warn!(%current_user_id, "Profile fetch failed.");
+            Err(AppError::Service(e))
+        }
+    }
+}
+
+pub async fn get_keys(
+    State(app_state): State<AppState>,
+    UserId(current_user_id): UserId
+) -> Result<Json<ApiKeyHintListResponse>, AppError> {
+    info!(%current_user_id, "Fetching api keys attempt");
+    match app_state.auth_service.get_keys(current_user_id).await {
+        Ok(resp) => {
+            info!(%current_user_id, "Successfully fetched user's api keys");
+            Ok(Json(resp))
+        },
+        Err(e) => {
+            warn!(%current_user_id, "Failed to fetch user's api keys");
+            Err(AppError::Service(e))
+        }
+    }
+}
 
 pub fn create_auth_controller() -> Router<AppState> {
 
@@ -116,6 +152,8 @@ pub fn create_auth_controller() -> Router<AppState> {
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/logout", post(logout))
+        .route("/me", get(get_profile))
+        .route("/keys", get(get_keys))
         .route("/keys/create", post(create_api_key))
         .route("/keys/revoke", post(revoke_api_key));
 

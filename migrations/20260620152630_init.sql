@@ -17,6 +17,7 @@ CREATE TABLE users (
 CREATE TABLE api_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id),
+    key_hint TEXT NOT NULL,
     key_hash TEXT NOT NULL,
     name VARCHAR(255),
     last_used_at TIMESTAMPTZ,
@@ -48,6 +49,8 @@ CREATE TABLE subscriptions (
 );
 
 CREATE INDEX idx_api_keys_user_id ON api_keys(user_id);
+CREATE INDEX idx_api_keys_key_hash ON api_keys(key_hash);
+CREATE INDEX idx_api_keys_key_hint ON api_keys(key_hint);
 CREATE INDEX idx_usage_events_user_id ON usage_events(user_id);
 CREATE INDEX idx_usage_events_api_key_id ON usage_events(api_key_id);
 CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);

@@ -15,16 +15,36 @@ impl ApiKeyRepository {
         }
     }
 
-    pub async fn create(&self, user_id: Uuid, key_hash: String, name: Option<String>) -> Result<ApiKey, InfrastructureError> {
+    pub async fn get_keys(&self, user_id: Uuid) -> Result<Vec<ApiKey>, InfrastructureError> {
+        let api_keys = sqlx::query_as!(
+            ApiKey,
+            "SELECT
+                id,
+                user_id,
+                key_hint,
+                key_hash,
+                name,
+                last_used_at,
+                revoked_at,
+                created_at
+            FROM api_keys
+            WHERE user_id=$1",
+            user_id
+        ).fetch_all(&self.pool).await?;
+        Ok(api_keys)
+    }
+
+    pub async fn create(&self, user_id: Uuid, key_hash: String, key_hint: String, name: Option<String>) -> Result<ApiKey, InfrastructureError> {
         let api_key = sqlx::query_as!(
             ApiKey,
             "
-            INSERT INTO api_keys  (user_id, key_hash, name)
-            VALUES ($1, $2, $3)
+            INSERT INTO api_keys  (user_id, key_hash, key_hint, name)
+            VALUES ($1, $2, $3, $4)
             RETURNING *
             ",
             user_id,
             key_hash,
+            key_hint,
             if name.is_some() { name.unwrap() } else {"my-key".to_string()}
         ).fetch_one(&self.pool).await?;
         Ok(api_key)
@@ -59,7 +79,15 @@ impl ApiKeyRepository {
         let result = sqlx::query_as!(
             ApiKey,
             "
-            SELECT * 
+            SELECT
+                id,
+                user_id,
+                key_hint,
+                key_hash,
+                name,
+                last_used_at,
+                revoked_at,
+                created_at
             FROM api_keys
             WHERE key_hash = $1
             ",
